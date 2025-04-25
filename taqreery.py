@@ -62,3 +62,29 @@ st.dataframe(filtered_df.style.set_properties(**{
     'color': 'black',
     'border-color': 'gray'
 }), use_container_width=True)
+
+
+# تحليل تفصيلي حسب الموقع
+st.markdown("---")
+st.subheader("📍 تحليل تفصيلي لموقع محدد")
+
+if "LOCATION" in df.columns:
+    selected_location = st.selectbox("اختر الموقع", options=sorted(df["LOCATION"].dropna().unique()))
+    location_df = df[df["LOCATION"] == selected_location]
+
+    st.write(f"📌 عدد الموظفين في هذا الموقع: **{location_df['Actual on Site'].sum()}**")
+
+    if "NATIONALITY" in location_df.columns:
+        nationality_summary = location_df["NATIONALITY"].value_counts().reset_index()
+        nationality_summary.columns = ["الجنسية", "عدد الموظفين"]
+
+        st.subheader("🌍 توزيع الجنسيات في هذا الموقع")
+        st.dataframe(nationality_summary, use_container_width=True)
+
+        fig_nat = px.pie(nationality_summary, names="الجنسية", values="عدد الموظفين", title="نسبة الجنسيات")
+        st.plotly_chart(fig_nat, use_container_width=True)
+
+    st.subheader("📄 جدول تفصيلي للموظفين في هذا الموقع")
+    st.dataframe(location_df, use_container_width=True)
+else:
+    st.warning("لم يتم العثور على عمود LOCATION في الملف.")
